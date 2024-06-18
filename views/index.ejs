@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+    
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        
+
+
+h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-bottom: 8px;
+    font-size: 16px;
+    color: #555;
+}
+
+input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color:rgb(0, 162, 255);
+    color: black;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+
+
+#result {
+    margin-top: 20px;
+    font-size: 16px;
+    color: #333;
+}
+
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>Validation Form</h1>
+        <form id="validationForm" method="POST" action="/api/validate">
+            <label for="inputData">Enter Phone Number:</label>
+            <input type="text" id="inputData" name="data" required>
+            <button type="submit">Validate</button>
+        </form>
+        <div id="result"></div>
+    </div>
+    <script>
+        document.getElementById('validationForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const inputData = document.getElementById('inputData').value;
+
+            fetch('/api/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ data: inputData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result');
+                if (data.success) {
+                    resultDiv.innerHTML = '<p>Validation Successful:</p>';
+                    resultDiv.style.color = 'green';
+                    if (data.upiIds && data.upiIds.length > 0) {
+                        const ul = document.createElement('ul');
+                        data.upiIds.forEach(upiId => {
+                            const li = document.createElement('li');
+                            li.textContent = upiId;
+                            ul.appendChild(li);
+                        });
+                        resultDiv.appendChild(ul);
+                    } else {
+                        resultDiv.textContent += ' No UPI IDs found';
+                    }
+                } else {
+                    resultDiv.textContent = 'Validation Failed: ' + data.message;
+                    resultDiv.style.color = 'red';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
